@@ -571,11 +571,11 @@ q2_roc_plot
 
 
 # Save ROC plot for the report.
-# ggsave(
-#   "q2_roc.png",
-#   q2_roc_plot,
-#   width = 6,
-#   height = 5,
-#   dpi = 300
-# )
+ggsave(
+  "q2_roc.png",
+  q2_roc_plot,
+  width = 6,
+  height = 5,
+  dpi = 300
+)
 
