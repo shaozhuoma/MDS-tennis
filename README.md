@@ -212,7 +212,6 @@ This follows the prediction setting where past matches are used to predict futur
 
 ```
 library(tidyverse)
-library(lubridate)
 library(tidymodels)
 library(themis)
 library(ranger)
