@@ -1,63 +1,101 @@
-# MDS-tennis
+## `q1_model.R`: Match-winner Prediction
 
-MDS Project - Tennis
-1. Project Setup
+ Q1 evaluates whether Set 1 information improves final match-winner prediction.
 
-Created GitHub repository MDS-tennis
+The target variable is `y`, where:
 
-Added .gitignore to exclude:
+| Target  | Meaning           |
+| ------- | ----------------- |
+| `y = 1` | P1 wins the match |
+| `y = 0` | P2 wins the match |
 
-data/ (raw dataset not uploaded, as per supervisor guidance)
+### Main Purpose
 
-virtual environments, cache files, system files
+Q1 tests whether adding Set 1 score information improves prediction beyond the pre-match baseline.
 
-Cloned dataset from Jeff Sackmann’s ATP Tennis repository
- into local data/tennis_atp/
+It also includes a simple Set 1 winner benchmark. This benchmark predicts the final match winner as the player who wins Set 1.
 
-2. Data Exploration (Python)
+### Feature Sets
 
-Loaded sample dataset atp_matches_2024.csv using pandas
+| Model        | Feature set                                           | Purpose                                         |
+| ------------ | ----------------------------------------------------- | ----------------------------------------------- |
+| Q1 Benchmark | Set 1 winner rule                                     | Simple benchmark                                |
+| Q1 GLM M0    | Pre-match features only                               | Logistic regression baseline                    |
+| Q1 GLM M1    | Pre-match + Set 1 game difference                     | Test added value of Set 1 margin direction      |
+| Q1 GLM M2    | Pre-match + Set 1 game difference + Set 1 total games | Test whether Set 1 length adds more information |
+| Q1 RF M0     | Pre-match features only                               | Random forest baseline                          |
+| Q1 RF M1     | Pre-match + Set 1 game difference                     | Flexible Set 1 model                            |
+| Q1 RF M2     | Pre-match + Set 1 game difference + Set 1 total games | Flexible extended Set 1 model                   |
 
-Examined:
+### Main Steps
 
-Shape (rows × columns)
+1. Load `df_partB_ready.csv`.
+2. Prepare the Q1 modelling dataset.
+3. Use a chronological train/test split:
+   - training set: matches before 2019;
+   - test set: matches from 2019.
+4. Check the class distribution of `y`.
+5. Fit logistic regression and random forest models.
+6. Compare pre-match-only models with Set 1 extended models.
+7. Evaluate the Set 1 winner benchmark.
+8. Calculate test-set metrics.
+9. Plot changes in model performance relative to the pre-match baseline.
+10. Save the figure as `q1_delta.png`.
 
-Column names and data types
+### Evaluation Metrics
 
-Descriptive statistics (.describe())
+The Q1 models are evaluated using:
 
-Missing value counts
+```text
+Accuracy
+ROC-AUC
+F1-score
+Log loss
+```
 
-Confirmed dataset contains:
+## `q2_model.R` — Third-set Prediction
 
-Tournament metadata
+### Main purpose
 
-Player biographical information
+This script evaluates whether Set 1 information helps predict whether a best-of-three match reaches a deciding third set.
 
-Match statistics (aces, double faults, serve points, etc.)
+### **Target variable**
 
-Player rankings
+| Target        | Meaning                                 |
+| ------------- | --------------------------------------- |
+| `need_s3 = 1` | The match requires a deciding third set |
+| `need_s3 = 0` | The match ends in straight sets         |
 
-3. Data Exploration (R)
+### **Model comparison**
 
-Loaded atp_matches_2023.csv using tidyverse
+| Model      | Feature set                                | Purpose                   |
+| ---------- | ------------------------------------------ | ------------------------- |
+| GLM M0     | Pre-match features only                    | Baseline                  |
+| GLM M1     | Pre-match + Set 1 features                 | Test added value of Set 1 |
+| RF M0      | Pre-match features only                    | Baseline                  |
+| RF M1      | Pre-match + Set 1 features                 | Test added value of Set 1 |
+| RF M1_down | Pre-match + Set 1 features + down-sampling | Handle class imbalance    |
 
-Used glimpse() and skimr::skim() to explore structure
+### **Main steps**
 
-Summarized:
+1. Load `df_partB_ready.csv`.
+2. Construct `need_s3` if it is not already included.
+3. Check the class distribution of `need_s3`.
+4. Split the data :
+   - training set: matches before 2019;
+   - test set: matches from 2019.
+5. Run stratified five-fold cross-validation.
+6. Compare GLM and random forest models using accuracy, balanced accuracy, and ROC-AUC.
+7. Fit the selected random forest models on the full training set.
+8. Evaluate test-set performance using:
+   - default cutoff = 0.5;
+   - CV-selected cutoff based on Youden's index.
+9. Save the ROC curve as `q2_roc.png`.
 
-Data dimensions
+### **Main outputs**
 
-Column types
-
-Missing values
-
-Unique counts for categorical variables
-
-4. Progress Summary
-
-Repository set up and connected to GitHub
-
-Data successfully loaded and explored in both Python and R
-
-Preliminary understanding of dataset structure and variable categories established
+- Cross-validation summary table;
+- test-set metric tables;
+- confusion matrices;
+- CV-selected thresholds;
+- ROC curve for RF M1 and RF M1_down.
