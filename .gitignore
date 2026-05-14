@@ -1,5 +1,7 @@
 # Ignore data directory
 data/
+original_atp_data/
+
 
 # Python cache
 __pycache__/
